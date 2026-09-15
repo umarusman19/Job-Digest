@@ -111,7 +111,7 @@ Use a Google App Password.
 ## Running it
 
 ```bash
-git clone https://github.com/USER/job-digest && cd job-digest
+git clone https://github.com/umarusman19/Job-Digest && cd Job-Digest
 pip install -r requirements.txt
 cp config.example.yaml config.yaml    # then edit it
 

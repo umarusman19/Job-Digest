@@ -25,7 +25,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "job-digest/1.0 (+https://github.com/USER/job-digest)"
+USER_AGENT = "job-digest/1.0 (+https://github.com/umarusman19/Job-Digest)"
 TIMEOUT = 20
 RETRIES = 3
 BACKOFF_BASE = 1.5

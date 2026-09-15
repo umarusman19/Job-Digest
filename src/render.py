@@ -111,5 +111,5 @@ def render_text(new: Sequence[Posting], results: Sequence[SourceResult],
         lines.append("")
 
     lines.append("-" * 58)
-    lines.append("github.com/USER/job-digest — runs on GitHub Actions")
+    lines.append("github.com/umarusman19/Job-Digest — runs on GitHub Actions")
     return "\n".join(lines)
