@@ -73,16 +73,37 @@ jobs:
       - name: Check each vendor still answers
         run: |
           python - <<'PY'
+          import sys
           from src.sources import fetch_board
+
           # Public boards, used only to prove the endpoint shapes still hold.
-          for company, ats, slug in [
+          # This step MUST be able to fail. fetch_board never raises by design,
+          # so an earlier version of this check printed "ERR" and still exited
+          # 0 — it reported success whether every endpoint answered or none of
+          # them did. A check that cannot fail is decorative.
+          TARGETS = [
               ("GitLab", "greenhouse", "gitlab"),
               ("Lever", "lever", "lever"),
               ("Ashby", "ashby", "ashby"),
-          ]:
+          ]
+
+          bad = []
+          for company, ats, slug in TARGETS:
               r = fetch_board(company, ats, slug)
-              print(f"{ats:11} {'OK ' if r.ok else 'ERR'} "
-                    f"{len(r.postings)} postings  {r.error or ''}")
+              n = len(r.postings)
+              print(f"{ats:11} {'OK ' if r.ok else 'ERR'} {n:4d} postings  {r.error or ''}")
+              if not r.ok:
+                  bad.append(f"{ats}: {r.error}")
+              elif n == 0:
+                  # A 200 with zero rows means the JSON shape changed under us:
+                  # these three boards are never empty. This is the silent
+                  # failure the whole project exists to catch.
+                  bad.append(f"{ats}: reachable but parsed 0 postings — shape changed?")
+
+          if bad:
+              print("\nFAILED:", *bad, sep="\n  ")
+              sys.exit(1)
+          print(f"\nAll {len(TARGETS)} vendors answered with postings.")
           PY
 
   digest:
