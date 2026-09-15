@@ -1,0 +1,92 @@
+# Copy to config.yaml and edit. config.yaml is gitignored on purpose: your
+# real target list says a lot about your job search, and this repo is public.
+#
+# The companies below are placeholders chosen because their boards are public
+# and well known. Replace them with your own.
+
+email_to: you@example.com
+
+# Every board is a public JSON endpoint. No API keys, no scraping, no headless
+# browser, nothing that can be rate-limited into looking like a bug.
+#
+#   greenhouse  ->  boards-api.greenhouse.io/v1/boards/<slug>/jobs
+#   lever       ->  api.lever.co/v0/postings/<slug>?mode=json
+#   ashby       ->  api.ashbyhq.com/posting-api/job-board/<slug>
+#
+# The slug is the company identifier in its careers URL. Get it wrong and the
+# endpoint returns 404, which this code reports as a probable bad slug rather
+# than as "no open roles" -- a distinction that cost me two silent months on an
+# earlier version.
+boards:
+  - company: Example Greenhouse Co
+    ats: greenhouse
+    slug: example
+  - company: Example Lever Co
+    ats: lever
+    slug: example
+  - company: Example Ashby Co
+    ats: ashby
+    slug: example
+
+filters:
+  # Matched with word boundaries, not substrings. "ui" will not match
+  # "building"; "pm" will not match "compliance".
+  title_include:
+    - product designer
+    - ux designer
+    - senior product designer
+    - design engineer
+    - ui designer
+
+  # Exclusions run BEFORE inclusions, because a req can say "product designer"
+  # in the body and still be a Product Manager role. This list is the most
+  # valuable part of the config: it encodes decisions you already made, so you
+  # stop re-litigating them at 2am.
+  title_exclude:
+    - product manager
+    - engineering manager
+    - graphic designer
+    - industrial designer
+    - motion designer
+    - intern
+    - internship
+    - director
+    - vp
+    - head of
+
+  location_allow:
+    - remote
+    - worldwide
+    - anywhere
+    - emea
+    - europe
+    - pakistan
+    - dubai
+    - abu dhabi
+    - uae
+    - saudi
+    - riyadh
+    - berlin
+    - germany
+
+  # Checked before the allow list. An aggregator's "Remote" tag frequently
+  # hides a region lock, and these are the phrases that give it away.
+  location_deny:
+    - united states only
+    - us only
+    - usa only
+    - canada only
+    - pst
+    - est only
+    - must be located in the us
+    - work authorization required
+
+  # true  -> a posting whose location matches nothing in location_allow is dropped
+  # false -> it is kept and you judge it yourself
+  require_location_match: true
+
+# Mailbox-based application tracking. Requires GMAIL_USER and
+# GMAIL_APP_PASSWORD in the environment (GitHub Actions secrets). Set to false
+# and the digest still works, it just reports jobs only.
+track_applications: true
+application_window_days: 90

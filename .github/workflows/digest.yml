@@ -1,0 +1,117 @@
+name: digest
+
+# Why Actions and not a laptop
+# ----------------------------
+# The first version of this system ran on my own machine on a schedule. On
+# 6 September it fired while the laptop was asleep, failed in eight seconds,
+# auto-suspended itself, and then never ran again. Nobody noticed for two days.
+#
+# Actions has no such failure mode: it is always on, it is free for a public
+# repository at this cadence, and the run history is public, which means the
+# claim "this works" is checkable by anyone reading the repo rather than
+# something I assert in a README.
+
+on:
+  schedule:
+    # 06:00 and 16:00 UTC = 11:00 and 21:00 Pakistan time. Twice a day, not
+    # every two hours: a digest you skim twice is read, and a digest that
+    # arrives twelve times is filtered to a folder you never open.
+    - cron: "0 6,16 * * *"
+  workflow_dispatch:      # manual run button
+  push:
+    branches: [main]
+
+permissions:
+  contents: write         # only so the state file can be committed back
+
+concurrency:
+  group: digest
+  cancel-in-progress: false   # never cancel a run mid-state-write
+
+jobs:
+  test:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest -q
+
+  smoke:
+    name: live endpoint smoke test
+    runs-on: ubuntu-latest
+    # Deliberately allowed to fail. A third party changing their API should
+    # show up as a warning on the run, not as a red mark on my commit.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Check each vendor still answers
+        run: |
+          python - <<'PY'
+          from src.sources import fetch_board
+          # Public boards, used only to prove the endpoint shapes still hold.
+          for company, ats, slug in [
+              ("GitLab", "greenhouse", "gitlab"),
+              ("Lever", "lever", "lever"),
+              ("Ashby", "ashby", "ashby"),
+          ]:
+              r = fetch_board(company, ats, slug)
+              print(f"{ats:11} {'OK ' if r.ok else 'ERR'} "
+                    f"{len(r.postings)} postings  {r.error or ''}")
+          PY
+
+  digest:
+    name: send digest
+    needs: test
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Materialise config
+        # config.yaml is gitignored because a public target list says too much
+        # about a private job search. It lives in one repository secret.
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+        run: |
+          if [ -z "$CONFIG_YAML" ]; then
+            echo "::error::CONFIG_YAML secret is not set. Copy your config.yaml into it."
+            exit 1
+          fi
+          printf '%s' "$CONFIG_YAML" > config.yaml
+
+      - name: Run
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python -m src.run --config config.yaml --state state/seen.json -v
+
+      - name: Remove config before anything else can read it
+        if: always()
+        run: rm -f config.yaml
+
+      - name: Commit state
+        if: success()
+        run: |
+          # The state file records which posting ids have been seen, and
+          # nothing else -- no titles, no companies, no URLs. There is a test
+          # asserting that (test_state_file_holds_no_titles_or_companies).
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/seen.json
+          git diff --staged --quiet || git commit -m "state: seen postings $(date -u +%F)"
+          git push

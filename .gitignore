@@ -1,0 +1,11 @@
+# Never commit these. The repo is public; the mailbox is not.
+config.yaml
+.env
+*.log
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
