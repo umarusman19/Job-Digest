@@ -1,0 +1,194 @@
+name: digest
+
+# Why Actions and not a laptop
+# ----------------------------
+# The first version of this system ran on my own machine on a schedule. On
+# 6 September it fired while the laptop was asleep, failed in eight seconds,
+# auto-suspended itself, and then never ran again. Nobody noticed for two days.
+#
+# Actions has no such failure mode: it is always on, it is free for a public
+# repository at this cadence, and the run history is public, which means the
+# claim "this works" is checkable by anyone reading the repo rather than
+# something I assert in a README.
+
+on:
+  schedule:
+    # 05:00, 09:00, 13:00, 17:00 UTC, weekdays only.
+    # = 10:00, 14:00, 18:00, 22:00 Pakistan time, Monday to Friday.
+    #
+    # Four a day rather than twelve, and none at the weekend. Two reasons,
+    # and the first is the one that matters:
+    #
+    # 1. Volume is how a digest dies. The version this replaced sent six
+    #    false alerts in two days and I stopped opening it. Twelve accurate
+    #    emails a day ends the same way — a filter, then a folder nobody
+    #    reads. The failure mode is inattention, not staleness.
+    # 2. Boards publish during business hours. This window spans the Gulf
+    #    working day (~04:00-13:00 UTC) and the European one (~07:00-17:00
+    #    UTC), which is where the roles actually are. A posting that appears
+    #    at 03:00 is no less applicable at 05:00, and twelve weekend runs
+    #    read boards that nobody has touched since Friday.
+    #
+    # GitHub also disables scheduled workflows after 60 days without repo
+    # activity, and cron here is best-effort: runs can be delayed at peak.
+    # Neither matters at this cadence; both would at :00 every two hours.
+    - cron: "0 5,9,13,17 * * 1-5"
+  workflow_dispatch:      # manual run button
+  push:
+    branches: [main]
+
+permissions:
+  contents: write         # only so the state file can be committed back
+
+concurrency:
+  group: digest
+  cancel-in-progress: false   # never cancel a run mid-state-write
+
+jobs:
+  test:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest -q
+
+  smoke:
+    name: live endpoint smoke test
+    runs-on: ubuntu-latest
+    # Deliberately allowed to fail. A third party changing their API should
+    # show up as a warning on the run, not as a red mark on my commit.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Check each vendor still answers
+        run: |
+          python - <<'PY'
+          import sys
+          from src.sources import fetch_board
+
+          # Public boards, used only to prove the endpoint shapes still hold.
+          # This step MUST be able to fail. fetch_board never raises by design,
+          # so an earlier version of this check printed "ERR" and still exited
+          # 0 — it reported success whether every endpoint answered or none of
+          # them did. A check that cannot fail is decorative.
+          TARGETS = [
+              ("GitLab", "greenhouse", "gitlab"),
+              ("Lever", "lever", "lever"),
+              ("Ashby", "ashby", "ashby"),
+          ]
+
+          bad = []
+          for company, ats, slug in TARGETS:
+              r = fetch_board(company, ats, slug)
+              n = len(r.postings)
+              print(f"{ats:11} {'OK ' if r.ok else 'ERR'} {n:4d} postings  {r.error or ''}")
+              if not r.ok:
+                  bad.append(f"{ats}: {r.error}")
+              elif n == 0:
+                  # A 200 with zero rows means the JSON shape changed under us:
+                  # these three boards are never empty. This is the silent
+                  # failure the whole project exists to catch.
+                  bad.append(f"{ats}: reachable but parsed 0 postings — shape changed?")
+
+          if bad:
+              print("\nFAILED:", *bad, sep="\n  ")
+              sys.exit(1)
+          print(f"\nAll {len(TARGETS)} vendors answered with postings.")
+          PY
+
+  digest:
+    name: send digest
+    needs: test
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      # Not configured yet is a normal state, not a failure.
+      #
+      # This job runs on a schedule. If it *failed* when its secrets were
+      # absent, a fork that nobody has configured would email its owner a
+      # "Run failed" notice four times every weekday, forever. That is the
+      # crying-wolf failure this entire repository was rebuilt to remove, and
+      # an earlier version of this file reproduced it exactly: real errors,
+      # correctly reported, on a schedule, until you stop reading them.
+      #
+      # So an unconfigured digest exits green with a notice in the run
+      # summary, and sends nothing.
+      - name: Check configuration
+        id: cfg
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          missing=""
+          [ -z "$CONFIG_YAML" ]         && missing="$missing CONFIG_YAML"
+          [ -z "$GMAIL_USER" ]          && missing="$missing GMAIL_USER"
+          [ -z "$GMAIL_APP_PASSWORD" ]  && missing="$missing GMAIL_APP_PASSWORD"
+
+          if [ -n "$missing" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Digest not configured — nothing sent"
+              echo
+              echo "Missing repository secret(s):**$missing**"
+              echo
+              echo "Add them under **Settings → Secrets and variables → Actions**:"
+              echo
+              echo "| Secret | What it is |"
+              echo "|---|---|"
+              echo "| \`CONFIG_YAML\` | your whole config.yaml, pasted |"
+              echo "| \`GMAIL_USER\` | the address the digest sends from and to |"
+              echo "| \`GMAIL_APP_PASSWORD\` | a Google **app password**, never your account password |"
+              echo
+              echo "The tests and the live endpoint check above still ran, so"
+              echo "this run tells you the code is healthy — it just has"
+              echo "nowhere to send anything yet."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Digest not configured; skipping. See the run summary."
+            exit 0
+          fi
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          # config.yaml is gitignored because a public target list says too
+          # much about a private job search. It lives in one repository secret.
+          printf '%s' "$CONFIG_YAML" > config.yaml
+
+      - name: Run
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python -m src.run --config config.yaml --state state/seen.json -v
+
+      - name: Remove config before anything else can read it
+        if: always()
+        run: rm -f config.yaml
+
+      - name: Commit state
+        if: success() && steps.cfg.outputs.configured == 'true'
+        run: |
+          # The state file records which posting ids have been seen, and
+          # nothing else -- no titles, no companies, no URLs. There is a test
+          # asserting that (test_state_file_holds_no_titles_or_companies).
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/seen.json
+          git diff --staged --quiet || git commit -m "state: seen postings $(date -u +%F)"
+          git push

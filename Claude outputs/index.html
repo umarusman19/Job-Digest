@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Umar Usman — Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#EFEFEC; --card:#FFFFFF; --ink:#0A0A0A; --muted:#66635C;
+  --rule:#DCDBD6; --accent:#CC2E1C; --accent-ink:#FFFFFF; --case:#1B62D6;
+  --font-display:"Space Grotesk","Archivo",system-ui,sans-serif;
+  --font-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#111110; --card:#1A1A18; --ink:#F2F1EC; --muted:#9A968C;
+    --rule:#2C2C28; --accent:#FF6B52; --accent-ink:#1A0B08; --case:#6D9BF1;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111110; --card:#1A1A18; --ink:#F2F1EC; --muted:#9A968C;
+  --rule:#2C2C28; --accent:#FF6B52; --accent-ink:#1A0B08; --case:#6D9BF1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);
+  font-size:16px;line-height:1.58;-webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:780px;margin:0 auto;padding-inline:22px;padding-block:0 60px}
+h1,h2,h3{margin:0;text-wrap:balance;font-family:var(--font-display)}
+p{margin:0}
+a{color:var(--ink);text-decoration-thickness:1px;text-underline-offset:2.5px;
+  text-decoration-color:var(--rule)}
+a:hover{text-decoration-color:var(--accent);color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* header */
+header{padding-block:44px 0}
+.tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--accent);font-weight:500}
+h1{font-size:clamp(30px,6vw,44px);font-weight:700;letter-spacing:-.028em;
+  line-height:1.04;margin-top:10px}
+.role{font-size:clamp(17px,2.6vw,20px);color:var(--muted);margin-top:9px;
+  max-width:46ch}
+.contact{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:20px;
+  font-family:var(--font-mono);font-size:12.5px;color:var(--muted)}
+.contact a{color:var(--muted)}
+
+/* the headline credential */
+.lead{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  padding:22px 24px;margin-top:32px}
+.lead p{font-size:17.5px;line-height:1.55}
+.lead p+p{margin-top:13px}
+.lead strong{font-weight:600}
+.src{display:block;margin-top:15px;font-family:var(--font-mono);font-size:11px;
+  color:var(--muted);line-height:1.5}
+
+/* brands */
+.brands{margin-top:24px;padding:20px 24px;border:1px solid var(--rule);
+  background:var(--card)}
+.brands-h{display:block;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.brands-row{display:flex;flex-wrap:wrap;gap:10px 34px;margin-top:14px}
+.brands-row span{font-family:var(--font-display);font-size:clamp(19px,3.4vw,25px);
+  font-weight:600;letter-spacing:-.018em;color:var(--ink)}
+.brands-note{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule);
+  font-size:13.5px;color:var(--muted);max-width:64ch;line-height:1.55}
+
+/* scale figures */
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
+.fig{background:var(--card);padding:16px 18px}
+.fig b{display:block;font-family:var(--font-display);font-size:clamp(23px,4vw,29px);
+  font-weight:700;letter-spacing:-.02em;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.fig span{display:block;font-size:13px;color:var(--muted);margin-top:5px;
+  line-height:1.4}
+
+section{margin-top:44px}
+h2{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);padding-bottom:9px;border-bottom:1px solid var(--rule)}
+.block{margin-top:22px}
+.block h3{font-size:18px;font-weight:600;letter-spacing:-.012em}
+.block p{margin-top:7px;color:var(--muted);max-width:66ch}
+.block p b{color:var(--ink);font-weight:500}
+.spec{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);
+  margin-top:9px;padding-left:13px;border-left:2px solid var(--rule)}
+
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin-top:6px}
+th{text-align:left;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;padding:10px 12px 8px 0;
+  border-bottom:1px solid var(--rule)}
+td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);color:var(--muted);
+  vertical-align:top}
+td:first-child{color:var(--ink);font-weight:500}
+.tw{overflow-x:auto}
+@media (max-width:560px){table{min-width:460px}}
+
+ul.plain{margin:14px 0 0;padding:0;list-style:none;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:7px 24px}
+ul.plain li{font-size:14.5px;color:var(--muted);padding-left:15px;position:relative}
+ul.plain li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;
+  background:var(--rule)}
+ul.plain li b{color:var(--ink);font-weight:500}
+
+.cta{margin-top:44px;padding-top:26px;border-top:2px solid var(--ink);
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{display:inline-block;font-family:var(--font-display);font-weight:600;
+  font-size:14.5px;padding:11px 20px;background:var(--ink);color:var(--paper);
+  text-decoration:none}
+.btn:hover{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--rule)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+footer{margin-top:34px;font-size:12.5px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="tag">Product Designer · Islamabad, Pakistan · UTC+5</span>
+  <h1>Umar Usman</h1>
+  <p class="role">Design systems, AI interaction, and data-dense enterprise
+  interfaces. Five years, the last two in trade promotion management.</p>
+  <div class="contact">
+    <a href="mailto:umarusmansnok@gmail.com">umarusmansnok@gmail.com</a>
+    <a href="tel:+923304691110">+92 330 469 1110</a>
+    <a href="https://umarusman.netlify.app">umarusman.netlify.app</a>
+    <a href="https://linkedin.com/in/umarusmanux">linkedin.com/in/umarusmanux</a>
+  </div>
+</header>
+
+<div class="lead">
+  <p>For the last two years Umar has been the product designer on
+  <strong>XTEL</strong>, a <strong>Kantar</strong> company, building its trade
+  promotion and revenue management platform — the system its own launch
+  describes as supporting <strong>more than 100 global CPG companies</strong>
+  and managing <strong>over €350 billion in annual trade spend</strong>.</p>
+  <p>He designed the AI interaction layer for that platform's
+  <strong>Microsoft 365 Copilot and Azure OpenAI integration</strong>,
+  including the failure states — latency, wrong answers, empty results,
+  citations, recovery, and confirmation friction on actions that move
+  committed spend.</p>
+  <span class="src">Platform scale and the Microsoft integration are XTEL's own
+  published figures — "XTEL Unveils Enhanced Trade Promotion Management,
+  Revenue Management AI Technology for Global CPGs &amp; Retailers, Powered by
+  Microsoft", 22 January 2026.</span>
+</div>
+
+<div class="brands">
+  <span class="brands-h">The manufacturers and retailers on the platform he designed for</span>
+  <div class="brands-row">
+    <span>Coca-Cola</span><span>Nestlé</span><span>Walmart</span><span>Tesco</span>
+  </div>
+  <p class="brands-note">Umar ran research sessions with commercial teams at
+  these businesses and designed against their feedback — promotion planning,
+  and retail execution and assortment at shelf level. He was the designer on
+  the platform, engaged through CONVO Corp to XTEL; these are the businesses
+  that use it.</p>
+</div>
+
+<div class="figs">
+  <div class="fig"><b>2</b><span>published Figma libraries, WCAG 2.2 from the first token</span></div>
+  <div class="fig"><b>20+</b><span>product files migrated off the Adobe XD-era system</span></div>
+  <div class="fig"><b>36</b><span>user interviews with commercial teams</span></div>
+  <div class="fig"><b>85</b><span>UX audit findings logged across three releases</span></div>
+</div>
+
+<section>
+  <h2>What he owns</h2>
+
+  <div class="block">
+    <h3>Design systems</h3>
+    <p>Two published Figma libraries built on <b>WCAG 2.2 from the first
+    token</b> rather than retrofitted — hundreds of components and tokens,
+    replacing an Adobe XD-era system across more than twenty product files.
+    Accessibility as a build constraint, not an audit afterwards.</p>
+    <p class="spec">Primary ink measured at 16.2:1. Minimum target height
+    40px, 44px for row-level actions.</p>
+  </div>
+
+  <div class="block">
+    <h3>AI interaction design</h3>
+    <p>Nine patterns specified end to end for an enterprise AI assistant,
+    against <b>Microsoft's Copilot guidance, Responsible AI principles and the
+    HAX toolkit</b>. The work others skip is the failure surface: what the
+    assistant does when it is slow, wrong, empty, or about to move money.
+    Trained in workshops run with Microsoft's design team.</p>
+  </div>
+
+  <div class="block">
+    <h3>Data-dense interfaces</h3>
+    <p>Navigators, data grids, filter systems, mass operations — and
+    <b>retail execution and shelf-level assortment</b> for grocery. Rebuilt the
+    grid standard across every module as one pattern replacing per-screen
+    styling.</p>
+    <p class="spec">Table type 11px → 14px. Row action targets 16px → 44px.</p>
+  </div>
+
+  <div class="block">
+    <h3>Research and rigour</h3>
+    <p><b>36 user interviews</b> with commercial teams at global manufacturers
+    and grocery retailers, and a release-by-release UX audit programme —
+    <b>85 findings</b> across three releases, each classified and linked to a
+    spec rather than filed and forgotten.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Independent work — the part nobody asked him to do</h2>
+  <div class="block">
+    <h3>A job watcher, and a postmortem on his own failures</h3>
+    <p>Built in the open while job-hunting: a system that reads company job
+    boards directly from their applicant tracking systems and emails only
+    genuinely new roles. Public, MIT licensed, <b>54 tests passing on CI</b>.</p>
+    <p>The part worth reading is <b>docs/postmortem.md</b> — a written account
+    of the three ways his own first version failed, including the one that
+    matters: it sent six false alerts in two days and he stopped opening it.
+    The fix was moving every judgement out of a prompt and into deterministic
+    code with a regression test.</p>
+    <p class="spec">github.com/umarusman19/Job-Digest</p>
+  </div>
+  <div class="block">
+    <h3>Accessibility auditing</h3>
+    <p>Audits against <b>WCAG 2.2 and EN 301 549</b> — measured, not scanned.
+    A first automated pass on one site returned twelve findings of which
+    eleven were false positives; the one that survived was a contrast failure
+    that only appears on a hovered or selected table row. Measuring rendered
+    pairs in context, rather than declared token values, is the whole
+    difference. He audits against the standard; a lawyer determines
+    compliance.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Track record</h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Company</th><th>Role</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td>CONVO Corp — client: XTEL, a Kantar company</td><td>Product Designer</td><td>Aug 2024 – present</td></tr>
+        <tr><td>Qlu.ai</td><td>Associate Product Designer → Product Designer</td><td>Jan – Aug 2024</td></tr>
+        <tr><td>Turing Nova (formerly IGS)</td><td>Product Designer</td><td>May 2022 – Dec 2023</td></tr>
+        <tr><td>Avenza Group of Companies</td><td>Graphic Designer</td><td>Apr 2021 – May 2022</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Training</h2>
+  <ul class="plain">
+    <li><b>UX training courses</b> — Nielsen Norman Group</li>
+    <li><b>Google UX Design</b> Professional Certificate</li>
+    <li><b>Design for the 21st Century</b> with Don Norman — IxDF</li>
+    <li><b>Human Computer Interaction</b> — IxDF</li>
+    <li><b>Product Design and UX/UI Fundamentals</b></li>
+    <li><b>Webflow Masterclass</b> — Flux Academy</li>
+  </ul>
+</section>
+
+<div class="cta">
+  <a class="btn" href="https://umarusman.netlify.app">Full portfolio</a>
+  <a class="btn ghost" href="https://github.com/umarusman19/Job-Digest">The repo</a>
+  <a class="btn ghost" href="mailto:umarusmansnok@gmail.com">Email Umar</a>
+</div>
+
+<footer>
+  Open to remote roles worldwide, and to relocation — the Gulf, Germany, the
+  UK and the EU. Available from mid-November 2026.<br>
+  Shared privately for introductions. Not listed publicly, and not indexed.
+</footer>
+
+</div>
+</body>
+</html>
