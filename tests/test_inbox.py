@@ -104,6 +104,50 @@ def test_advances_classified(text):
     assert classify("Your application", text) == "advanced"
 
 
+def test_acknowledgement_saying_next_steps_is_not_an_advance():
+    """The bug that reported a 60.8% response rate on a mailbox with no
+    interviews in it. Application confirmations routinely say "next steps"."""
+    for body in [
+        "Thank you for applying. Here are the next steps in your application.",
+        "We have received your application. Next steps: our team will review it.",
+        "Thanks for applying to the role. What happens next: we'll be in touch.",
+    ]:
+        assert classify("Your application", body) == "awaiting", body
+
+
+def test_genuine_invitation_still_counts_as_advance():
+    for body in [
+        "We would like to schedule a call with you this week",
+        "Please book a slot with the hiring manager",
+        "We invite you to complete a take-home exercise",
+        "You have been selected for an interview",
+        "We are moving you forward to the next round",
+    ]:
+        assert classify("Your application", body) == "advanced", body
+
+
+def test_advance_wins_when_an_acknowledgement_also_invites():
+    body = ("Thank you for applying. We'd like to schedule a call "
+            "with you on Thursday.")
+    assert classify("Your application", body) == "advanced"
+
+
+def test_zero_hour_rejections_are_counted_not_averaged():
+    """One row per company means a company whose only email is the rejection
+    computes as 0h. Averaging those made the median look faster than reality."""
+    apps = [
+        app("A", 100, "rejected", 100),  # 0h — same message
+        app("B", 100, "rejected", 69),   # 31h — real
+        app("C", 100, "rejected", 57),   # 43h — real
+    ]
+    s = summarise(apps, 90, now=NOW)
+    assert s.rejected == 3
+    assert s.untimed_rejections == 1
+    assert s.median_hours_to_rejection == 37.0   # median of 31 and 43 only
+    assert s.fastest_rejection_hours == 31.0     # not 0.0
+    assert "untimed_rejections" in s.to_public_dict()
+
+
 def test_rejection_beats_advance_when_both_present():
     """Rejection emails routinely say 'next steps' in the sign-off.
 

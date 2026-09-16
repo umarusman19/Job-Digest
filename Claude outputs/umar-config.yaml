@@ -1,0 +1,182 @@
+# Umar's job digest — paste this whole file into the CONFIG_YAML secret.
+# Never commit it: config.yaml is gitignored because a public target list
+# says a great deal about a private job search.
+#
+# Board set weighted to Germany, the Gulf and genuinely remote-first
+# companies, because those are the tracks that fit inside the runway.
+# Slugs marked "unconfirmed" resolved via auto-detect, which never recorded
+# which platform answered — they default to greenhouse. A wrong platform
+# returns zero rows silently, so if a company here never appears in a digest,
+# that is the first thing to suspect.
+
+email_to: umarusmansnok@gmail.com
+
+boards:
+  # --- platform + slug both verified against the live endpoint ---
+  - company: Celonis
+    ats: greenhouse
+    slug: celonis
+  - company: RELEX Solutions
+    ats: greenhouse
+    slug: relex
+  - company: Salsify
+    ats: greenhouse
+    slug: salsify
+  - company: Verkada
+    ats: greenhouse
+    slug: verkada
+  - company: Automattic
+    ats: greenhouse
+    slug: automatticcareers
+  - company: Instacart
+    ats: greenhouse
+    slug: instacart
+  - company: Enable
+    ats: lever
+    slug: enable
+  - company: Oyster HR
+    ats: ashby
+    slug: oyster
+  - company: Lean Technologies
+    ats: ashby
+    slug: leantech
+  - company: Deel
+    ats: ashby
+    slug: deel
+
+  # --- slug resolves, platform unconfirmed (defaults to greenhouse) ---
+  # Germany and Europe
+  - company: N26
+    ats: greenhouse
+    slug: n26                # unconfirmed
+  - company: GetYourGuide
+    ats: greenhouse
+    slug: getyourguide       # unconfirmed
+  - company: HelloFresh
+    ats: greenhouse
+    slug: hellofresh         # unconfirmed
+  - company: SumUp
+    ats: greenhouse
+    slug: sumup              # unconfirmed
+
+  # Gulf
+  - company: Careem
+    ats: greenhouse
+    slug: careem             # unconfirmed
+  - company: Tamara
+    ats: greenhouse
+    slug: tamara             # unconfirmed
+
+  # Remote-first
+  - company: GitLab
+    ats: greenhouse
+    slug: gitlab             # unconfirmed
+  - company: Figma
+    ats: greenhouse
+    slug: figma              # unconfirmed
+
+filters:
+  # Matched on whole words. "ui" will not catch "building" or "guide".
+  title_include:
+    - product designer
+    - senior product designer
+    - lead product designer
+    - ux designer
+    - senior ux designer
+    - ui designer
+    - design engineer
+    - design systems
+    - design system
+    - staff designer
+    - senior designer
+
+  # Applied BEFORE the include list, because a requisition can say
+  # "product designer" in its body and still be a product manager role.
+  # Note: "engineer" is deliberately NOT here — it would kill
+  # "design engineer", which is a title worth seeing.
+  title_exclude:
+    - product manager
+    - engineering manager
+    - program manager
+    - project manager
+    - graphic designer
+    - industrial designer
+    - motion designer
+    - brand designer
+    - visual designer
+    - marketing designer
+    - intern
+    - internship
+    - trainee
+    - junior
+    - apprentice
+    - director
+    - vp
+    - head of
+    - principal
+    - coordinator
+
+  location_allow:
+    - remote
+    - worldwide
+    - anywhere
+    - global
+    - emea
+    - europe
+    - pakistan
+    - islamabad
+    - lahore
+    - karachi
+    - dubai
+    - abu dhabi
+    - uae
+    - united arab emirates
+    - saudi
+    - riyadh
+    - jeddah
+    - qatar
+    - doha
+    - germany
+    - berlin
+    - munich
+    - hamburg
+    - netherlands
+    - amsterdam
+    - spain
+    - portugal
+    - lisbon
+    - poland
+    - united kingdom
+    - london
+
+  # Checked before the allow list. A board's "Remote" tag routinely conceals
+  # a region lock that appears only in the requisition text.
+  location_deny:
+    - us only
+    - usa only
+    - united states
+    - canada
+    - us remote
+    - united states only
+    - us-based
+    - us based
+    - canada only
+    - latam
+    - brazil only
+    - pst
+    - est only
+    - work authorization required
+    - security clearance
+    - must be located in the us
+    - must reside in the united states
+
+  # true  -> drop anything whose location matches nothing allowed
+  # false -> keep it and judge yourself
+  # Start true. If the digest goes quiet for a week, flip it to false — many
+  # boards leave the location field blank entirely.
+  require_location_match: true
+
+# Reads your mailbox over IMAP and reports application figures: counts and
+# time-to-reply only. Company names never leave the process.
+track_applications: true
+application_window_days: 90

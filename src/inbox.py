@@ -63,16 +63,28 @@ REJECTED = re.compile(
     re.I,
 )
 ADVANCED = re.compile(
-    r"\b(?:schedule (?:a|an|your)"
-    r"|book (?:a|your) (?:call|slot|time)"
-    r"|next steps?"
+    r"\b(?:schedule (?:a|an|your) (?:call|chat|interview|conversation|time)"
+    r"|book (?:a|your) (?:call|slot|time|interview)"
     r"|would (?:like|love) to (?:speak|chat|meet)"
-    r"|invite you to"
+    r"|invite you to (?:a|an|the|interview|complete)"
     r"|technical (?:interview|screen)"
     r"|take[- ]home"
-    r"|offer letter)\b",
+    r"|offer letter"
+    r"|mov(?:e|ed|ing) (?:you )?(?:forward|to the next round)"
+    r"|selected for (?:an?|the) (?:interview|next))\b",
     re.I,
 )
+
+# A bare "next steps" USED to live in ADVANCED and it was wrong. Nearly every
+# application confirmation says "here's what happens next" or "next steps in
+# your application", so on a real mailbox it counted 23 acknowledgements as
+# companies that had moved Umar forward, and reported a 60.8% response rate on
+# a search that had produced no interviews at all. A flattering number is worse
+# than no number.
+#
+# It is kept here as a WEAK signal: it only counts as an advance when the
+# message is not also an application confirmation.
+WEAK_ADVANCE = re.compile(r"\bnext steps?\b", re.I)
 ACKNOWLEDGED = re.compile(
     r"\b(?:thank you for (?:your )?(?:applying|application|interest)"
     r"|we(?:'ve| have) received your application"
@@ -117,12 +129,13 @@ class Stats:
     ghost_threshold_days: int = GHOST_AFTER_DAYS
     window_days: int = 0
     unreadable_messages: int = 0
+    untimed_rejections: int = 0
 
     _PUBLIC_KEYS = (
         "total", "awaiting", "rejected", "advanced", "ghosted",
         "median_hours_to_rejection", "fastest_rejection_hours",
         "slowest_rejection_hours", "ghost_threshold_days", "window_days",
-        "unreadable_messages",
+        "unreadable_messages", "untimed_rejections",
     )
 
     def to_public_dict(self) -> dict:
@@ -155,11 +168,26 @@ def _company_from_domain(domain: str) -> str:
 
 
 def classify(subject: str, body: str) -> Status:
-    """Order matters: a rejection often also mentions 'next steps'."""
+    """Order matters, and each step is here because it got something wrong.
+
+    1. Rejection first: a rejection email routinely signs off with "next
+       steps, feel free to reapply", and reading that as progress is the most
+       flattering possible error.
+    2. A strong advance signal beats an acknowledgement: "thanks for applying,
+       we'd like to schedule a call" is genuinely an advance.
+    3. An acknowledgement beats a weak signal. "Thank you for applying. Here
+       are the next steps in your application" is a confirmation, not an
+       interview, and treating it as one inflated the response rate to 60.8%
+       on a mailbox with no interviews in it.
+    """
     blob = f"{subject}\n{body[:4000]}"
     if REJECTED.search(blob):
         return "rejected"
     if ADVANCED.search(blob):
+        return "advanced"
+    if ACKNOWLEDGED.search(blob):
+        return "awaiting"
+    if WEAK_ADVANCE.search(blob):
         return "advanced"
     return "awaiting"
 
@@ -182,7 +210,15 @@ def summarise(apps: Sequence[Application], window_days: int,
         if status == "rejected":
             s.rejected += 1
             h = a.hours_to_response
-            if h is not None and h >= 0:
+            # A duration under half an hour is an artefact, not a measurement.
+            # One row is kept per company, so a company whose only message is
+            # the rejection has applied_at == responded_at and computes as 0h.
+            # Averaging those in reported a "fastest rejection: 0h" and pulled
+            # the median down. They are counted separately instead of dropped
+            # silently, because a hidden exclusion is its own kind of lie.
+            if h is None or h < 0.5:
+                s.untimed_rejections += 1
+            else:
                 rejection_hours.append(h)
         elif status == "advanced":
             s.advanced += 1

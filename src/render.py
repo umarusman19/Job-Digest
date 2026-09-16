@@ -89,6 +89,11 @@ def render_text(new: Sequence[Posting], results: Sequence[SourceResult],
                          f"{stats.median_hours_to_rejection:.0f}h")
             lines.append(f"  Fastest: {stats.fastest_rejection_hours:.0f}h  "
                          f"Slowest: {stats.slowest_rejection_hours:.0f}h")
+            if stats.untimed_rejections:
+                lines.append(f"  ({stats.untimed_rejections} rejection(s) had no "
+                             "measurable gap — the only message from")
+                lines.append("   that company was the rejection itself, so they "
+                             "are counted but not timed.)")
             if stats.median_hours_to_rejection < 48:
                 lines.append("")
                 lines.append("  A median under 48h means these are automated")
